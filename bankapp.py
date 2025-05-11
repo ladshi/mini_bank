@@ -332,7 +332,9 @@ def withdrawal():
                                 continue
                     except ValueError:
                         print("Invalid input!Try again!")
-                # Add the (updated or unchanged) account details to the list
+            else:
+                print("Invalid account number or password.")
+               # Add the (updated or unchanged) account details to the list
                 updated_lines.append(','.join(acc_details))
 
     with open(ACCOUNTS, "w") as acc_file:
@@ -381,7 +383,7 @@ def transaction_history():
         for line in transaction_file:
             details = line.strip().split(',')
             if details[0] == account_number:
-                print(record_transaction(account_number, details[1], details[2], details[3]))
+                print(f"{details[0]},{details[1]},{details[2]},{details[3]}")
 
 admin_setup()
 
