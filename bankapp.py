@@ -286,10 +286,12 @@ def withdrawal():
     account_number = input("Enter your account number:")
     password = input("Enter your password:")
 
-    with open(ACCOUNTS, "r") as acc_file:
+    with open(ACCOUNTS, "a") as acc_file:
         lines = acc_file.readlines()
 
-    updated_lines = []
+        updated_lines = []
+    with open(ACCOUNTS, "r") as acc_file:
+        lines = acc_file.readlines()
         for line in acc_file:
             acc_details = line.strip().split(',')
             if acc_details[0] == account_number and acc_details[2] == password:
