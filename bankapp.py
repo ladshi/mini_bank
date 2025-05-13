@@ -58,19 +58,20 @@ def next_admin_id():
 def transaction_history():
     if not os.path.exists(TRANSACTION_HISTORY):
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
     else:
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
     print(f"{account_number},{transaction_type},{amount},{balance},{timestamp}")
 
 # -------------setting up the first time system login----------------------------------------------
 def admin_setup():
-    print("Command! Control! Customize!Your Admin Setup.")
-    admin_name = input("Enter the admin name:")
-    admin_password = input("Enter the password:").strip()
-    # creatig a id for adminprint(next_admin_id())
-    new_admin_id = next_admin_id()
+    if not os.path.exists(ADMIN_DETAILS):
+        print("Command! Control! Customize!Your Admin Setup.")
+        admin_name = input("Enter the admin name:")
+        admin_password = input("Enter the password:").strip()
+        # creatig a id for adminprint(next_admin_id())
+        new_admin_id = next_admin_id()
 
     try:
         if not os.path.exists(ADMIN_DETAILS):
@@ -167,6 +168,9 @@ def create_account():
     except FileNotFoundError:
         print("File not found")
 
+        # with open(TRANSACTION_HISTORY,"w")
+
+
 # -------------------adding a new admin---------------------------------------------------
 def add_admin():
     admin_name = input("Enter the admin name:")
@@ -223,7 +227,7 @@ def main_menu():
                 transaction_history()
             elif user_choice == 5:
                 print("Exit!")
-                break
+                exit()
             elif user_choice < 1 or user_choice > 5:
                 print("Invalid number.Choose betweewn 1-6 only!")
         except ValueError:
@@ -231,57 +235,81 @@ def main_menu():
 
 # -------------------DEPOSIT MONEY---------------------------------------------------
 def deposit():
+    isYes = True
     Account_number = input("Enter your account number:")
 
     with open(ACCOUNTS, "r") as acc_file:
         lines = acc_file.readlines()
 
-    update_lines = []#this is a list to store the updated balance
+    update_lines = [] #this is a list to store the updated balance
 
-    with open(ACCOUNTS, "a") as acc_file:
+    with open(ACCOUNTS, "w") as acc_file:
+        i = 0
+        isIndex = True
         for line in lines:
             acc_details = line.strip().split(',')
             if acc_details[0] == Account_number:
                 while True:
+                    if isYes == True:
+                        try:
+                            deposit_amount = float(input("Enter the deposit amount:"))
 
-                    try:
-                        deposit_amount = float(input("Enter the deposit amount:"))
+                            if deposit_amount > 0:
+                                balance = float(acc_details[3]) + deposit_amount
+                                print(f"You have deposited successfully!\nYour current balance is {balance}.")    
 
-                        if deposit_amount > 0:
-                            balance = float(acc_details[3]) + deposit_amount
-                            print(f"You have deposited successfully!\nYour current balance is {balance}.")
-
-                            while True:
-                                depositeagain = input("Are you going to do another deposit?\nyes or no:")
-                                if depositeagain.lower() == "yes":
-                                    break
-                                elif depositeagain.lower() == "no":
-                                    print(
-                                        f"Your deposit was successful.\nYour current balance is {balance}.\nThank You!")
-                                    # saving the transaction history
-                                    with open(TRANSACTION_HISTORY, "a") as transaction_file:
-                                        transaction_type = "deposit"
-                                        amount = deposit_amount
-                                        transaction_file.write(f"{Account_number},{transaction_type},{amount},{balance},{timestamp}\n")
-
-                                    main_menu()
+                                if isIndex == True:                          
+                                    update_lines.append(f"{acc_details[0]},{acc_details[1]},{acc_details[2]},{balance}\n")
                                 else:
-                                    print("Your input is invalid.Please input yes or no.")
-                                    continue
+                                    update_lines[i] = f"{acc_details[0]},{acc_details[1]},{acc_details[2]},{balance}\n"                                                                                        
 
-                        elif deposit_amount == 0:
-                            print("Your Deposit amount should be greater than 0.")
-                        else:
-                            print("Your deposit amount should be a positive.")
-                    except ValueError:
-                        print("Please enter the valid amount.")
-        # Add the (updated or unchanged) account details to the list
-        updated_lines.append(','.join(acc_details))
+                                while isYes:
+                                    depositeagain = input("Are you going to do another deposit?\nyes or no:")
+                                    if depositeagain.lower() == "yes":
+                                        isIndex = False
+                                        break
+                                    elif depositeagain.lower() == "no":
+                                        print(f"Your deposit was successful.\nYour current balance is {balance}.\nThank You!")
+                                        # saving the transaction history
+                                        
+                                        with open(TRANSACTION_HISTORY, "a") as transaction_file:
+                                            transaction_type = "deposit"
+                                            amount = deposit_amount
+                                            transaction_file.write(f"{Account_number},{transaction_type},{amount},{balance}\n")
+                                            # transaction_file.write(f"{Account_number},{transaction_type},{amount},{balance},{timestamp}\n")
+                                            isYes = False
+                                        
+                                    else:
+                                        print("Your input is invalid.Please input yes or no.")
+                                        continue
 
-    # Update the accounts file with the new balance
-    with open(ACCOUNTS, "w") as acc_file:
-        acc_file.write("\n".join(updated_lines))
-        print("\n".join(updated_lines)) 
+                            elif deposit_amount == 0:
+                                print("Your Deposit amount should be greater than 0.")
+                            else:
+                                print("Your deposit amount should be a positive.")
+
+                        except ValueError:
+                            print("Please enter the valid amount.")
+                    else:                    
+                        print("TESTING 02")
+                        break
+                print('TESTING 03')
+                # update_lines.append(f"{acc_details[0]},{acc_details[1]},{acc_details[2]},{balance}")   
+            else:
+                update_lines.append(f"{line}")
+            i = i + 1
+        acc_file.writelines(update_lines)
+
+    print(update_lines)
+
+    #     # Add the (updated or unchanged) account details to the list
+    #     updated_lines.append(','.join(acc_details))
+    #     print('TESTING 01: ', updated_lines)
+    # # Update the accounts file with the new balance
+    # # with open(ACCOUNTS, "w") as acc_file:
+    #     acc_file.write("\n".join(updated_lines))
+    #     print("\n".join(updated_lines)) 
+    main_menu()
 # -------------------WITHDRAW MONEY---------------------------------------------------
 def withdrawal():
     account_number = input("Enter your account number:")
@@ -350,14 +378,17 @@ def check_balance():
         for line in acc_file:
             acc_details = line.strip().split(',')
             if acc_details[0] == account_number and acc_details[2] == password:
+                print(f"Your current balance is {acc_details[3]}.")
+                break
 
-                with open(TRANSACTION_HISTORY, "r") as transaction_file:
-                    for line in transaction_file:
-                        transaction_details = line.strip().split(',')
+                # with open(TRANSACTION_HISTORY, "r") as transaction_file:
+                #     for line in transaction_file:
+                #         transaction_details = line.strip().split(',')
 
-                        print(f"Your current balance is {transaction_details[3]}.")
-            else:
-                print("Invalid account number or password.")
+                #         print(f"Your current balance is {transaction_details[3]}.")
+        else:
+            print("Invalid account number or password.\n")
+            
 
 # -------------------UPDATE ACCOUNT BALANCE-------------------------------------------
 # def update_account_balance(account_number, new_balance):
@@ -373,22 +404,24 @@ def check_balance():
 
 # -------------------TRANSACTION HISTORY----------------------------------------------
 def transaction_history():
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     account_number = input("Enter your account number:").strip()
 
+    
     if not os.path.exists(TRANSACTION_HISTORY):
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
             
     with open(TRANSACTION_HISTORY, "r") as transaction_file:
         print("Your Transaction History:")
         for line in transaction_file:
             details = line.strip().split(',')
             if details[0] == account_number:
-                print(f"{details[0]},{details[1]},{details[2]},{details[3]},{details[4]}")
+                print(f"{details[0]},{details[1]},{details[2]},{details[3]}")
 
 admin_setup()
 
-
+# 
 
 
 
