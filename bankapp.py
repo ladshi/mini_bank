@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 CUSTOMER_ID = "last_id.txt"
 ADMIN_ID = "admin_id.txt"
@@ -57,11 +58,11 @@ def next_admin_id():
 def transaction_history():
     if not os.path.exists(TRANSACTION_HISTORY):
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
     else:
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
-    print(f"{account_number},{transaction_type},{amount},{balance}")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
+    print(f"{account_number},{transaction_type},{amount},{balance},{timestamp}")
 
 # -------------setting up the first time system login----------------------------------------------
 def admin_setup():
@@ -261,7 +262,7 @@ def deposit():
                                     with open(TRANSACTION_HISTORY, "a") as transaction_file:
                                         transaction_type = "deposit"
                                         amount = deposit_amount
-                                        transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
+                                        transaction_file.write(f"{Account_number},{transaction_type},{amount},{balance},{timestamp}\n")
 
                                     main_menu()
                                 else:
@@ -280,19 +281,19 @@ def deposit():
     # Update the accounts file with the new balance
     with open(ACCOUNTS, "w") as acc_file:
         acc_file.write("\n".join(updated_lines))
-           
+        print("\n".join(updated_lines)) 
 # -------------------WITHDRAW MONEY---------------------------------------------------
 def withdrawal():
     account_number = input("Enter your account number:")
     password = input("Enter your password:")
 
-    with open(ACCOUNTS, "a") as acc_file:
+    with open(ACCOUNTS, "r") as acc_file:
         lines = acc_file.readlines()
 
         updated_lines = []
     with open(ACCOUNTS, "r") as acc_file:
         lines = acc_file.readlines()
-        for line in acc_file:
+        for line in lines:
             acc_details = line.strip().split(',')
             if acc_details[0] == account_number and acc_details[2] == password:
                 balance = float(acc_details[3])
@@ -359,16 +360,16 @@ def check_balance():
                 print("Invalid account number or password.")
 
 # -------------------UPDATE ACCOUNT BALANCE-------------------------------------------
-def update_account_balance(account_number, new_balance):
-    with open(ACCOUNTS, "r") as acc_file:
-        accounts = [line.strip() for line in acc_file]
+# def update_account_balance(account_number, new_balance):
+#     with open(ACCOUNTS, "r") as acc_file:
+#         accounts = [line.strip() for line in acc_file]
 
-    with open(ACCOUNTS, "w") as acc_file:
-        for account in accounts:
-            acc_details = account.split(',')
-            if acc_details[0] == account_number:
-                acc_details[3] = str(new_balance)
-            acc_file.write(','.join(acc_details) + "\n")
+#     with open(ACCOUNTS, "w") as acc_file:
+#         for account in accounts:
+#             acc_details = account.split(',')
+#             if acc_details[0] == account_number:
+#                 acc_details[3] = str(new_balance)
+#             acc_file.write(','.join(acc_details) + "\n")
 
 # -------------------TRANSACTION HISTORY----------------------------------------------
 def transaction_history():
@@ -376,14 +377,14 @@ def transaction_history():
 
     if not os.path.exists(TRANSACTION_HISTORY):
         with open(TRANSACTION_HISTORY, "a") as transaction_file:
-            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
+            transaction_file.write(f"{account_number},{transaction_type},{amount},{balance},{timestamp}\n")
             
     with open(TRANSACTION_HISTORY, "r") as transaction_file:
         print("Your Transaction History:")
         for line in transaction_file:
             details = line.strip().split(',')
             if details[0] == account_number:
-                print(f"{details[0]},{details[1]},{details[2]},{details[3]}")
+                print(f"{details[0]},{details[1]},{details[2]},{details[3]},{details[4]}")
 
 admin_setup()
 
