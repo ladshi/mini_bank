@@ -121,11 +121,10 @@ def Login():
             login_successful = False
 
             with open(ADMIN_DETAILS, 'r') as admin_file:
-                # for admin in admin_file:
+                for admin in admin_file:
                 # admin_detail = admin_file.readlines()
-                # admin_details = admin_file.split(',').strip()
-            
-                if      "U001" == correct_admin_id and "1234" == correct_password:
+                    admin_details = admin_file.split(',').strip()
+                if  admin_details[0] == correct_admin_id and admin_details[2] == correct_password:
                     login_successful = True
 
                 if login_successful == True:
