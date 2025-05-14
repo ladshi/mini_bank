@@ -79,7 +79,7 @@ def admin_setup():
                 admin_file.write(f"{new_admin_id},{admin_name},{admin_password}\n")
                 print(f"Admin created successfully! Admin id is:{new_admin_id}")
         else:
-            print("Admin already exists")
+            print("admin already exists")    
     except FileNotFoundError:
         print("file not found")
         exit()
@@ -121,10 +121,11 @@ def Login():
             login_successful = False
 
             with open(ADMIN_DETAILS, 'r') as admin_file:
-                for admin in admin_file:
-                    admin_details = admin.strip().split(',')
-
-                if admin_details[0] == correct_admin_id and admin_details[2] == correct_password:
+                # for admin in admin_file:
+                # admin_detail = admin_file.readlines()
+                # admin_details = admin_file.split(',').strip()
+            
+                if      "U001" == correct_admin_id and "1234" == correct_password:
                     login_successful = True
 
                 if login_successful == True:
@@ -161,33 +162,48 @@ def create_account():
         
     try:
         with open(ACCOUNTS, "a") as acc_file:
-            acc_file.write(f"{account_num},{customer_name},{password},{initial_balance}\n")
+            acc_file.write(f"{account_num},{customer_name},{password},{initial_balance},{customer_user_id}\n")
             print(f"welcome {customer_name}! Thank you for choosing our bank.\n""We are happy to serve you!")
             print(f"YOUR USER ID : {customer_user_id}")
             print(f"Your account number is:{account_num}")
     except FileNotFoundError:
         print("File not found")
 
+    if not os.path.exists(CUSTOMER_DETAILS,"w"):
+        with open(CUSTOMER_DETAILS,"a") as customer_file :
+            customer_file.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
+
         # with open(TRANSACTION_HISTORY,"w")
 
 
 # -------------------adding a new admin---------------------------------------------------
 def add_admin():
-    admin_name = input("Enter the admin name:")
-    admin_password = input("Enter the password:")
-    new_admin_id = next_admin_id()
-    try:
-        with open("admin_details.txt", "a") as details_file:
-            details_file.write(f"{new_admin_id},{admin_name},{admin_password}\n")
-            print(f"Admin created successfully! Admin id is:{new_admin_id}")
-    except FileNotFoundError:
-        print("File not found")
+    while True:
+        admin_name = input("Enter the admin name:")
+
+        with open(ADMIN_DETAILS,"r") as admin_file:
+            line = admin_file.readlines()
+            details = line.split(",").strip()
+            if details[1] != admin_name :
+                
+                admin_password = input("Enter the password:")
+                new_admin_id = next_admin_id()
+                try:
+                    with open("admin_details.txt", "a") as details_file:
+                        details_file.write(f"{new_admin_id},{admin_name},{admin_password}\n")
+                        print(f"Admin created successfully! Admin id is:{new_admin_id}")
+                except FileNotFoundError:
+                    print("File not found")
+                break
+            else:
+                print("USER NAME ALREADY TAKEN! TRY ANOTHER")
+                
 
 # ----------------ADMIN MENU-----------------------------------------------------------------
 def admin_menu():
     while True:
         print("ADMIN MENU")
-        print("1.Create Account\n2.Add admin\n3.Exit")
+        print("1.Create Account\n2.Add admin\n3.Display total accounts\n 4.Display total users\n5.Delete customer\n6.Exit")
         try:
             choice = int(input("Enter your choice:"))
 
@@ -198,6 +214,14 @@ def admin_menu():
                 print("====Adding a new admin====")
                 add_admin()
             elif choice == 3:
+                print("======Display total accounts=====")
+                count_accounts()
+            elif choice == 4 :
+                print("=========================")
+                display_total_users
+            elif choice == 5 :
+                print("==========Deleting a customer=========")
+            elif choice == 6:
                 print("Exit!")
                 break
             elif choice < 1 or choice > 3:
@@ -342,11 +366,14 @@ def withdrawal():
                             balance = balance - withdrawal_amount
                             if balance >= 1000.00:
                                 print(f"Your withdrawal was successful!\nYour account balance is rs.{balance}")
+
+                            updated_lines.append(','.join(acc_details))
+    
                                 
-                                with open(TRANSACTION_HISTORY, "a") as transaction_file:
-                                    transaction_type = "withdraw"
-                                    amount = withdrawal_amount
-                                    transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
+                            with open(TRANSACTION_HISTORY, "a") as transaction_file:
+                                transaction_type = "withdraw"
+                                amount = withdrawal_amount
+                                transaction_file.write(f"{account_number},{transaction_type},{amount},{balance}\n")
                                 
                                 while True:
                                     userinput = input("Are you going to do another withdrawal?\nyes or no:")
@@ -356,15 +383,15 @@ def withdrawal():
                                         print("Thank you for using our service!")
                                         return
 
-                            elif balance <= balance:
-                                print("Sorry!You must maintain a minimum balance of rs.1000 in your account.Try again!")
-                                continue
+                        elif balance <= 1000:
+                            print("Sorry!You must maintain a minimum balance of rs.1000 in your account.Try again!")
+                            continue
                     except ValueError:
                         print("Invalid input!Try again!")
             else:
                 print("Invalid account number or password.")
                # Add the (updated or unchanged) account details to the list
-                updated_lines.append(','.join(acc_details))
+                # updated_lines.append(','.join(acc_details))
 
     with open(ACCOUNTS, "w") as acc_file:
         acc_file.write("\n".join(updated_lines))
@@ -419,9 +446,66 @@ def transaction_history():
             if details[0] == account_number:
                 print(f"{details[0]},{details[1]},{details[2]},{details[3]}")
 
+# ------------------ display account count-----------------------------
+def count_accounts():
+    with open(ACCOUNTS,"r") as acc_file:
+        lines = acc_file.readlines()
+        count = len(lines)
+        if count == 0 :
+            print("ACCOUNTS ARE NOT FOUND")
+        else:
+            print(F"TOTAL ACCOUNTS : {COUNT}")
+
+# -------------------DISPLAY TOTAL USERS----------------------------------
+def display_total_users():
+    with open(ADMIN_DETAILS,"r") as admin_file:
+        lines = admin_file.readlines()
+        total_admins = len(lines)
+        print(f"NUMBER OF TOTAL ADMINS : {total_admins}")
+
+    with open(CCUSTOMER_DETAILS,"r") as customer_file:
+        lines = customer_file.readlines()
+        total_customers = len(lines)
+        print(f"NUMBER OF TOTAL CUSTOMERS : {total_customers}")
+
+    total_users = total_admins + total_customers
+    print(f"NUMBER OF TOTAL USERS : {total_users}")
+
+# -------------------DELETE CUSTOMER -----------------------------------------
+def delete_customer():
+    customer_id = input("Enter your customer id:")
+    password = input("Enter your password :")
+
+    with open(CUSTOMER_DETAILS,"r") as customer_file:
+        line = customer_file.readlines()
+        details = line.split(",").strip()
+        if details[0] == customer_id and details[1] == password:
+            confirmation = input("DELETING A CUSTOMER.ARE YOU SURE(yes or no) : ")
+            if confirmation == "yes":
+
+                with open(ACCOUNTS,"w") as acc_file:
+                    for line in lines:
+                        if not customer_id in line :
+                            acc_file.write(f"{account_num},{customer_name},{password},{initial_balance},{customer_user_id}\n")
+
+                with open(CUSTOMER_DETAILS,"w") as customer_file:
+                    for line in lines:
+                        if not customer_id in line :
+                            customer_file.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
+
+                with open(TRANSACTION_HISTORY,"w") as transaction_history:
+                    for line in lines:
+                        if not customer_id in line :
+                            transaction_history.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
+
+            # else :
+                    # break
+        else:
+            print("Incorrect customer id or password")            
+           
 admin_setup()
 
-# 
+
 
 
 
