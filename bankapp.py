@@ -121,9 +121,8 @@ def Login():
             login_successful = False
 
             with open(ADMIN_DETAILS, 'r') as admin_file:
-                for admin in admin_file:
-                # admin_detail = admin_file.readlines()
-                    admin_details = admin_file.split(',').strip()
+                admin_detail = admin_file.readline().strip()
+                admin_details = admin_detail.split(',')
                 if  admin_details[0] == correct_admin_id and admin_details[2] == correct_password:
                     login_successful = True
 
@@ -168,7 +167,7 @@ def create_account():
     except FileNotFoundError:
         print("File not found")
 
-    if not os.path.exists(CUSTOMER_DETAILS,"w"):
+    if not os.path.exists(CUSTOMER_DETAILS):
         with open(CUSTOMER_DETAILS,"a") as customer_file :
             customer_file.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
 
@@ -181,8 +180,8 @@ def add_admin():
         admin_name = input("Enter the admin name:")
 
         with open(ADMIN_DETAILS,"r") as admin_file:
-            line = admin_file.readlines()
-            details = line.split(",").strip()
+            line = admin_file.readline()
+            details = line.strip().split(",")
             if details[1] != admin_name :
                 
                 admin_password = input("Enter the password:")
@@ -195,14 +194,14 @@ def add_admin():
                     print("File not found")
                 break
             else:
-                print("USER NAME ALREADY TAKEN! TRY ANOTHER")
+                print("USER NAME ALREADY TAKEN! TRY ANOTHER ONE!")
                 
 
 # ----------------ADMIN MENU-----------------------------------------------------------------
 def admin_menu():
     while True:
         print("ADMIN MENU")
-        print("1.Create Account\n2.Add admin\n3.Display total accounts\n 4.Display total users\n5.Delete customer\n6.Exit")
+        print("1.Create Account\n2.Add admin\n3.Display total accounts\n4.Display total users\n5.Delete customer\n6.Exit")
         try:
             choice = int(input("Enter your choice:"))
 
@@ -217,9 +216,10 @@ def admin_menu():
                 count_accounts()
             elif choice == 4 :
                 print("=========================")
-                display_total_users
+                display_total_users()
             elif choice == 5 :
                 print("==========Deleting a customer=========")
+
             elif choice == 6:
                 print("Exit!")
                 break
@@ -453,7 +453,7 @@ def count_accounts():
         if count == 0 :
             print("ACCOUNTS ARE NOT FOUND")
         else:
-            print(F"TOTAL ACCOUNTS : {COUNT}")
+            print(F"TOTAL ACCOUNTS : {count}")
 
 # -------------------DISPLAY TOTAL USERS----------------------------------
 def display_total_users():
@@ -462,7 +462,7 @@ def display_total_users():
         total_admins = len(lines)
         print(f"NUMBER OF TOTAL ADMINS : {total_admins}")
 
-    with open(CCUSTOMER_DETAILS,"r") as customer_file:
+    with open(CUSTOMER_DETAILS,"r") as customer_file:
         lines = customer_file.readlines()
         total_customers = len(lines)
         print(f"NUMBER OF TOTAL CUSTOMERS : {total_customers}")
@@ -483,17 +483,17 @@ def delete_customer():
             if confirmation == "yes":
 
                 with open(ACCOUNTS,"w") as acc_file:
-                    for line in lines:
+                    for line in acc_file:
                         if not customer_id in line :
                             acc_file.write(f"{account_num},{customer_name},{password},{initial_balance},{customer_user_id}\n")
 
                 with open(CUSTOMER_DETAILS,"w") as customer_file:
-                    for line in lines:
+                    for line in  customer_file:
                         if not customer_id in line :
                             customer_file.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
 
                 with open(TRANSACTION_HISTORY,"w") as transaction_history:
-                    for line in lines:
+                    for line in transaction_history:
                         if not customer_id in line :
                             transaction_history.write(f"{customer_user_id},{password},{customer_name},{NIC_No},{address},{phone_num}\n")
 
